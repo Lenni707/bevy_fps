@@ -43,7 +43,8 @@ fn setup_assets(
         unlit: true,
         double_sided: true,
         ..default()
-    });
+    }
+    );
 }
 
 fn spawn_snowflakes(
