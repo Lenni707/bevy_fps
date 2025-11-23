@@ -31,7 +31,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, (spawn_camera, grab_cursor))
-            .add_systems(Update, (camera_movement, camera_look));
+            .add_systems(Update, (camera_movement, camera_look, handle_input, move_snowballs));
     }
 }
 
@@ -123,3 +123,72 @@ fn camera_movement(
         camera.grounded = true;
     }
 }
+
+#[derive(Component)]
+pub struct Snowball {
+    pub velocity: Vec3,
+}
+
+const GROUND_LEVEL: f32 = 0.0;
+
+fn spawn_snowball(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    cam: &Transform,
+) {
+    let pos = cam.translation + (*cam.forward()) * 1.0;
+    let vel = *cam.forward() * 20.0;
+
+    commands.spawn((
+        Mesh3d(meshes.add(Sphere::new(0.1).mesh().build())),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::WHITE,
+            unlit: true,
+            ..default()
+        })),
+        Snowball { velocity: vel },
+        Transform::from_translation(pos),
+    ));
+}
+
+fn move_snowballs(
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut Transform, &mut Snowball)>,
+    mut commands: Commands
+) {
+    let dt = time.delta_secs();
+    let gravity = 7.5;
+
+    for (entity, mut t, mut ball) in query.iter_mut() {
+        t.translation += ball.velocity * dt;
+        // gravity
+        ball.velocity.y -= gravity * dt;
+        // despawn if on ground
+        if t.translation.y <= GROUND_LEVEL {
+            commands.entity(entity).despawn();
+            continue;
+        }
+    }
+}
+
+fn handle_input(
+    mouse: Res<ButtonInput<MouseButton>>,
+    camera_query: Query<&Transform, With<Camera3d>>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if mouse.just_pressed(MouseButton::Left) {
+        let Ok(cam) = camera_query.single() else { return };
+        spawn_snowball(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            cam,
+        );
+    }
+}
+
+
+

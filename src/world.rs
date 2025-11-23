@@ -27,7 +27,7 @@ fn spawn_ground(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(200.0, 200.0))),
+        Mesh3d(meshes.add(Plane3d::default().mesh().size(2000.0, 2000.0))),
         MeshMaterial3d(materials.add(Color::srgb(1.0, 1.0, 1.0))),
         Transform::default(),
     ));
