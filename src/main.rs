@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+// todo:
+// -> procedual terrain generation with Noise-Driven Heightmap Terrain
+
 use crate::player::PlayerPlugin;
 use crate::world::WorldPlugin;
 use crate::snowflake::SnowflakePlugin;
