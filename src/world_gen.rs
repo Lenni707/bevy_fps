@@ -2,13 +2,13 @@ use std::collections::HashMap; // for saving chunks
 use bevy::prelude::*;
 
 use crate::chunks::*;
+use crate::noise::NoiseGenerators;
 
-pub const CHUNK_SIZE: usize = 64;
+pub const CHUNK_SIZE: usize = 32;
 pub const VERTEX_SPACING: f32 = 1.0; // wie viele verticies in einem chunk sind
-pub const RENDER_DISTANCE: i32 = 20;
-pub const SEED: u32 = 12345;
-pub const NOISE_FREQ: f64 = 0.01; // wie hart die übergänge sind
-pub const NOISE_AMP: f32 = 20.0; // wie steil alles ist, also berge und so
+pub const RENDER_DISTANCE: i32 = 12;
+pub const NOISE_FREQ: f64 = 0.005; // wie hart die übergänge sind
+pub const NOISE_AMP: f32 = 30.0; // wie steil alles ist, also berge und so
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct ChunkCoord {
@@ -35,6 +35,7 @@ pub fn chunk_system(
     mut commands: Commands,
     mut loaded: ResMut<LoadedChunks>,
     player_query: Query<&GlobalTransform, With<Camera3d>>,
+    noise: Res<NoiseGenerators>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
@@ -54,7 +55,7 @@ pub fn chunk_system(
     // load chunks
     for coord in wanted_chunk.iter() {
         if !loaded.chunks.contains_key(coord) {
-            let mesh = calc_to_generate_chunk(*coord);
+            let mesh = calc_to_generate_chunk(*coord, &noise);
 
             let ent = commands.spawn((
                 Mesh3d(meshes.add(mesh)), 

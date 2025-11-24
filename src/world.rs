@@ -4,7 +4,7 @@ pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (setup_lighting)); // , spawn_ground
+        app.add_systems(Startup, setup_lighting); // , spawn_ground
         // spawn background
         app.insert_resource(ClearColor(Color::srgb_u8(173, 216, 230)));
     }
