@@ -10,6 +10,7 @@ use crate::snowflake::SnowflakePlugin;
 mod player;
 mod world;
 mod snowflake;
+mod world_gen;
 
 fn main() {
     App::new()
