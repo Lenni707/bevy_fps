@@ -1,5 +1,6 @@
 use std::collections::HashMap; // for saving chunks
 use bevy::prelude::*;
+use rand::Rng;
 
 use crate::chunks::*;
 use crate::noise::NoiseGenerators;
@@ -28,6 +29,7 @@ impl Plugin for WorldGenPlugin {
         app
             .init_resource::<LoadedChunks>()
             .add_systems(Startup, load_tree_model)
+            .add_systems(Startup, load_candy_cane)
             .add_systems(Update, chunk_system);
     }
 }
@@ -93,7 +95,7 @@ pub fn chunk_system(
                             local_z,
                             h,
                         );
-                    }
+                    };
                 }
             }
             loaded.chunks.insert(*coord, ent);
@@ -140,6 +142,55 @@ fn spawn_tree(
         parent.spawn((
             SceneRoot(tree_model.handle.clone()),
             Transform::from_xyz(x, height, z).with_scale(Vec3::splat(1.25)),
+        ));
+    });
+}
+
+#[derive(Resource)]
+pub struct CandyCane {
+    pub handle: Handle<Scene>,
+}
+
+fn load_candy_cane(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let candy_cane: Handle<Scene> = asset_server.load("candy_cane.glb#Scene0");
+
+    commands.insert_resource(CandyCane { handle: candy_cane });
+}
+
+// todo: muss noch gespawned werden
+
+fn spawn_candy_cane(
+    commands: &mut Commands,
+    candy_cane: &CandyCane,
+    parent: Entity,
+    x: f32,
+    z: f32,
+    height: f32,
+) {
+    let mut rng = rand::thread_rng();
+
+    // for random rotation
+    let yaw = rng.gen_range(0.0_f32..360.0).to_radians();
+
+    // slight tilt
+    let tilt_x = rng.gen_range(-10.0_f32..10.0).to_radians();
+    let tilt_z = rng.gen_range(-10.0_f32..10.0).to_radians();
+    // random rotation
+    let rotation = Quat::from_rotation_y(yaw)
+        * Quat::from_rotation_x(tilt_x)
+        * Quat::from_rotation_z(tilt_z);
+
+    commands.entity(parent).with_children(|parent| {
+        parent.spawn((
+            SceneRoot(candy_cane.handle.clone()),
+            Transform {
+                translation: Vec3::new(x, height, z),
+                rotation,
+                scale: Vec3::splat(1.25),
+            },
         ));
     });
 }

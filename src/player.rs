@@ -217,7 +217,6 @@ fn move_snowballs(
     }
 }
 
-
 fn handle_input(
     mouse: Res<ButtonInput<MouseButton>>,
     camera_query: Query<&Transform, With<Camera3d>>,

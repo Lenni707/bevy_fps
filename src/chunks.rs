@@ -102,37 +102,30 @@ pub fn calc_to_generate_chunk(coord: ChunkCoord, noise: &NoiseGenerators,) -> Me
 
 pub fn get_height(world_x: f64, world_z: f64, noise: &NoiseGenerators) -> f32 {
     // calc für biomes
-        let biome_val = noise.biome.get([world_x * BIOME_FREQ, world_z * BIOME_FREQ]) as f32;
+    let biome_val = noise.biome.get([world_x * BIOME_FREQ, world_z * BIOME_FREQ]) as f32;
 
-        // // check which biome it is based on noise level /brauch man nur fuer farbe ändern je nach biom
-        // let biome = if biome_val < -0.2 {
-        //     Biome::Plains
-        // } else {
-        //     Biome::Forest
-        // };
+    // biome blend factor t (0 = plains, 1 = forest)
+    let t = ((biome_val + 0.2) / (0.3 + 0.2)).clamp(0.0, 1.0);
 
-        // biome blend factor t (0 = plains, 1 = forest)
-        let t = ((biome_val + 0.2) / (0.3 + 0.2)).clamp(0.0, 1.0);
+    // base height from noise
+    let base_h = noise.height.get([world_x * NOISE_FREQ, world_z * NOISE_FREQ]) as f32;
 
-        // base height from noise
-        let base_h = noise.height.get([world_x * NOISE_FREQ, world_z * NOISE_FREQ]) as f32;
+    // height per biome
+    let plains_h = base_h * NOISE_AMP * PLAINS_SCALE;
+    let forest_h = base_h * NOISE_AMP * FOREST_SCALE;
 
-        // height per biome
-        let plains_h = base_h * NOISE_AMP * PLAINS_SCALE;
-        let forest_h = base_h * NOISE_AMP * FOREST_SCALE;
+    // final smooth height
+    let mut height = plains_h * (1.0 - t) + forest_h * t;
 
-        // final smooth height
-        let mut height = plains_h * (1.0 - t) + forest_h * t;
+    let erosion = noise.height.get([world_x * 0.03, world_z * 0.03]) as f32 * 2.0;
 
-        let erosion = noise.height.get([world_x * 0.03, world_z * 0.03]) as f32 * 2.0;
+    // rounded snow drifts
+    let drift_n = noise.height.get([world_x * 0.01, world_z * 0.01]) as f32;
+    let drifts = drift_n.abs().powf(2.0) * 6.0;
 
-        // rounded snow drifts
-        let drift_n = noise.height.get([world_x * 0.01, world_z * 0.01]) as f32;
-        let drifts = drift_n.abs().powf(2.0) * 6.0;
-
-        height += erosion + drifts;
-        // returns height
-        height
+    height += erosion + drifts;
+    // returns height
+    height
 }
 
 
@@ -152,7 +145,6 @@ pub fn should_tree_spawn(
 
     tree_noise < tree_frequency
 }
-
 // linear interpolation helper von chatty
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a * (1.0 - t) + b * t
