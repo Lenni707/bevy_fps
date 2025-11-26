@@ -72,17 +72,21 @@ fn camera_look(
     mut motion: EventReader<bevy::input::mouse::MouseMotion>,
     mut query: Query<(&mut Transform, &mut FlyCamera)>,
 ) {
-    let Ok((mut transform, mut camera)) = query.single_mut() else {
-        return;
-    };
-    
+    let Ok((mut transform, mut camera)) = query.single_mut() else { return };
+
     for ev in motion.read() {
-        camera.yaw -= ev.delta.x * camera.sensitivity;
+        camera.yaw   -= ev.delta.x * camera.sensitivity;
         camera.pitch -= ev.delta.y * camera.sensitivity;
 
+        // Clamp pitch
         camera.pitch = camera.pitch.clamp(-FRAC_PI_2 + 0.01, FRAC_PI_2 - 0.01);
 
-        transform.rotation = Quat::from_euler(EulerRot::YXZ, camera.yaw, camera.pitch, 0.0);
+        // Build two rotations: yaw → world, pitch → local X
+        let yaw_rot   = Quat::from_rotation_y(camera.yaw);
+        let pitch_rot = Quat::from_rotation_x(camera.pitch);
+
+        // Combine them
+        transform.rotation = yaw_rot * pitch_rot;
     }
 }
 
@@ -290,13 +294,18 @@ fn spawn_sled(
     sled: &Sled,
     cam_state: &mut FlyCamera,
 ) {
-    let spawn_pos = cam_transform.translation - Vec3::new(-0.5, 1.0, 0.7);
+    let spawn_pos = cam_transform.translation - Vec3::new(0.0, 1.75, 0.0);
+
+    let sled_rotation = Quat::from_rotation_y(cam_state.yaw);
 
     commands.spawn((
         SledEntity,
         SceneRoot(sled.handle.clone()),
-        Transform::from_translation(spawn_pos)
-            .with_scale(Vec3::splat(0.5)),
+        Transform {
+            translation: spawn_pos,
+            rotation: sled_rotation,
+            scale: Vec3::splat(0.5),
+        },
     ));
 
     cam_state.sledding = true;
