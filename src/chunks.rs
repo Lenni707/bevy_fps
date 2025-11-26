@@ -149,3 +149,10 @@ pub fn should_tree_spawn(
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a * (1.0 - t) + b * t
 }
+// check if candy caner should spawn
+pub fn should_candy_spawn(world_x: f64, world_z: f64, noise: &NoiseGenerators) -> bool {
+    let n = noise.candy_cane.get([world_x * 0.30, world_z * 0.30]) as f32;
+    let n = (n + 1.0) * 0.5;
+
+    n < 0.05 // spawn density
+}

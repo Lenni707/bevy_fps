@@ -39,6 +39,7 @@ pub fn chunk_system(
     mut loaded: ResMut<LoadedChunks>,
     player_query: Query<&GlobalTransform, With<Camera3d>>,
     tree_model: Res<TreeModel>, 
+    candy_cane: Res<CandyCane>,
     noise: Res<NoiseGenerators>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -83,7 +84,6 @@ pub fn chunk_system(
                     let local_x = wx - chunk_x;
                     let local_z = wz - chunk_z;
 
-
                     if should_tree_spawn(wx as f64, wz as f64, &noise) {
                         let h = get_height(wx as f64, wz as f64, &noise);
 
@@ -96,6 +96,19 @@ pub fn chunk_system(
                             h,
                         );
                     };
+
+                    if should_candy_spawn(wx as f64, wz as f64, &noise) {
+                        let h = get_height(wx as f64, wz as f64, &noise);
+
+                        spawn_candy_cane(
+                            &mut commands,
+                            &candy_cane,
+                            ent,
+                            local_x,
+                            local_z,
+                            h,
+                        );
+                    }
                 }
             }
             loaded.chunks.insert(*coord, ent);
@@ -158,9 +171,9 @@ fn load_candy_cane(
     let candy_cane: Handle<Scene> = asset_server.load("candy_cane.glb#Scene0");
 
     commands.insert_resource(CandyCane { handle: candy_cane });
-}
 
-// todo: muss noch gespawned werden
+    println!("loaded candycane")
+}
 
 fn spawn_candy_cane(
     commands: &mut Commands,
@@ -189,7 +202,7 @@ fn spawn_candy_cane(
             Transform {
                 translation: Vec3::new(x, height, z),
                 rotation,
-                scale: Vec3::splat(1.25),
+                scale: Vec3::splat(5.0),
             },
         ));
     });

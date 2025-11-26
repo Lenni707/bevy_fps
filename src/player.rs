@@ -5,6 +5,7 @@ use bevy::core_pipeline::bloom::Bloom;
 
 use crate::noise::NoiseGenerators;
 use crate::chunks::get_height;
+use crate::world_gen::*;
 
 #[derive(Component)]
 pub struct FlyCamera {
@@ -45,8 +46,17 @@ fn spawn_camera(mut commands: Commands) {
         Camera3d::default(),
         FlyCamera::default(),
         Bloom::NATURAL, 
+        DistanceFog {
+                color: Color::srgb(0.8, 0.9, 1.0),
+                falloff: FogFalloff::Linear {
+                    start: (RENDER_DISTANCE as f32) * CHUNK_SIZE as f32,
+                    end: (RENDER_DISTANCE as f32 + 10.0) * CHUNK_SIZE as f32,
+                },
+                ..default()
+        },
         Transform::from_xyz(0.0, 1.5, 5.0),
     ));
+    
 }
 
 fn grab_cursor(mut window: Query<&mut Window, With<PrimaryWindow>>) {

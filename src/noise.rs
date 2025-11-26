@@ -6,6 +6,7 @@ pub struct NoiseGenerators {
     pub height: Perlin,
     pub biome: Perlin,
     pub tree: Perlin,
+    pub candy_cane: Perlin
 }
 
 impl NoiseGenerators {
@@ -14,6 +15,7 @@ impl NoiseGenerators {
             height: Perlin::new().set_seed(seed), 
             biome: Perlin::new().set_seed(seed + 69),
             tree: Perlin::new().set_seed(seed + 89),
+            candy_cane: Perlin::new().set_seed(seed + 109),
         }
     }
 }
