@@ -244,3 +244,44 @@ fn handle_input(
         );
     }
 }
+
+#[derive(Resource)]
+pub struct Sled {
+    pub handle: Handle<Scene>,
+}
+
+fn load_slead(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let sled: Handle<Scene> = asset_server.load("sled.glb#Scene0");
+
+    commands.insert_resource(Sled { handle: sled });
+
+    println!("loaded candycane")
+}
+
+fn spawn_sled(
+    mut commands: Commands,
+    camera_query: Query<Entity, With<Camera3d>>,
+    sled: Res<Sled>
+) {
+    let Ok(cam_entity) = camera_query.single() else {
+        return;
+    };
+
+    commands.entity(cam_entity).with_children(|parent| {
+        parent.spawn((
+            SceneRoot(sled.handle.clone()),
+            Transform::from_xyz(0.0, -0.5, -1.0),
+        ));
+    });
+}
+
+fn update_sledding(
+    mut commands: Commands,
+    camera_query: Query<&Transform, With<Camera3d>>,
+    sled: &Sled
+) {
+
+}

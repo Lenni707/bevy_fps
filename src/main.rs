@@ -16,7 +16,7 @@ mod noise;
 
 fn main() {
     App::new()
-        .insert_resource(noise::NoiseGenerators::new(12345))
+        .insert_resource(noise::NoiseGenerators::new(67))
         .add_plugins((DefaultPlugins, PlayerPlugin, WorldPlugin, SnowflakePlugin, WorldGenPlugin, HudPlugin))
         .add_systems(Update, exit_on_esc)
         .run();
